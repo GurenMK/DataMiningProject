@@ -71,28 +71,30 @@ OUTPUT(count(locationEmptyFile), NAMED('HaveLocation'));
 
 												
 //Visualization 1
-testCount := TABLE(locationEmptyFile, {beginloaction, state, c := COUNT(GROUP)}, beginloaction);
-OUTPUT(SORT(testCount, -c), NAMED('Tornadoes_In_City'));
+testCount := TABLE(locationEmptyFile, {beginloaction, state, NumberOfTornadoes := COUNT(GROUP)}, beginloaction);
+OUTPUT(SORT(testCount, -NumberOfTornadoes), NAMED('Tornadoes_In_City'));
 mappings :=  DATASET([  {'Location', 'beginloaction'}/*x*/, 
-                        {'Tornadoes', 'c'}/*Y*/], 
+                        {'Tornadoes', 'NumberOfTornadoes'}/*Y*/], 
 												Visualizer.KeyValueDef);												
 Visualizer.MultiD.column('Tornadoes_In_City_Chart', /*datasource*/, 'Tornadoes_In_City', mappings, /*filteredBy*/, /*dermatologyProperties*/ );
 
 //Visualization 2
-testCount2 := TABLE(locationEmptyFile, {state, c := COUNT(GROUP)}, state);
-OUTPUT(SORT(testCount2, -c), NAMED('Tornadoes_In_State'));
+testCount2 := TABLE(locationEmptyFile, {state, NumberOfTornadoes := COUNT(GROUP)}, state);
+OUTPUT(SORT(testCount2, -NumberOfTornadoes), NAMED('Tornadoes_In_State'));
 mappings2 :=  DATASET([  {'Location', 'state'}/*x*/, 
-                        {'Tornadoes', 'c'}/*Y*/], 
+                        {'Tornadoes', 'NumberOfTornadoes'}/*Y*/], 
 												Visualizer.KeyValueDef);												
 Visualizer.MultiD.column('Tornadoes_In_State_Chart', /*datasource*/, 'Tornadoes_In_State', mappings2, /*filteredBy*/, /*dermatologyProperties*/ );
 
 //Visualization 3
-testCount3 := TABLE(locationEmptyFile, {a := IF(ROUND(begintime/100)=0,24,ROUND(begintime/100)), c := COUNT(GROUP)}, IF(ROUND(begintime/100)=0,24,ROUND(begintime/100)));
-OUTPUT(SORT(testCount3, a), NAMED('Tornadoes_Per_Hour'));
-mappings3 :=  DATASET([  {'Hour', 'a'}/*x*/, 
-                        {'Tornadoes', 'c'}/*Y*/], 
+testCount3 := TABLE(locationEmptyFile, {Hour := IF(ROUND(begintime/100)=0,24,ROUND(begintime/100)), NumberOfTornadoes := COUNT(GROUP)}, IF(ROUND(begintime/100)=0,24,ROUND(begintime/100)));
+OUTPUT(SORT(testCount3, Hour), NAMED('Tornadoes_Per_Hour'));
+mappings3 :=  DATASET([  {'Hour', 'Hour'}/*x*/, 
+                        {'Tornadoes', 'NumberOfTornadoes'}/*Y*/], 
 												Visualizer.KeyValueDef);												
 Visualizer.MultiD.column('Tornadoes_Per_Hour_Chart', /*datasource*/, 'Tornadoes_Per_Hour', mappings3, /*filteredBy*/, /*properties*/ );
+
+
 
 
 
