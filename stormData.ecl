@@ -62,44 +62,106 @@ Layout := RECORD
 	STRING AddcorrDate;
 END;
 
-torFile := DATASET('~online::project::tornado::alldata__p454606156', Layout, THOR);
-OUTPUT(COUNT(torFile), NAMED('ALLTornadoesCount'));
-OUTPUT(torFile, NAMED('ALLTornadoes'));
+DataFile := '~online::project::tornado::alldata__p454606156';
+DataFile2 := '~online::project::storm::alldata__p280202545';
+torFile := DATASET(DataFile, Layout, THOR);
+stormFile := DATASET(DataFile2, Layout, THOR);
+//OUTPUT(torFile, NAMED('ALLTornadoes'));
+//OUTPUT(COUNT(torFile), NAMED('ALLTornadoesCount'));
+//OUTPUT(stormFile, NAMED('ALLStorms'));
+//OUTPUT(COUNT(stormFile), NAMED('ALLStormsCount'));
 
-locationEmptyFile := torFile(beginloaction <> '');
-OUTPUT(count(locationEmptyFile), NAMED('HaveLocation'));
+locationNotEmptyFile := torFile(beginloaction <> '');
+//OUTPUT(count(locationEmptyFile), NAMED('HaveLocation'));
 
+PropertyDamage := IF(torFile.DamageProperty[LENGTH(torFile.DamageProperty)]='K',
+											((REAL)torFile.DamageProperty[1..(LENGTH(torFile.DamageProperty))])*1000,
+											((REAL)torFile.DamageProperty[1..(LENGTH(torFile.DamageProperty))])*1000000
+											);
+StormPropertyDamage := IF(stormFile.DamageProperty[LENGTH(stormFile.DamageProperty)]='K',
+											((REAL)stormFile.DamageProperty[1..(LENGTH(stormFile.DamageProperty))])*1000,
+											((REAL)stormFile.DamageProperty[1..(LENGTH(stormFile.DamageProperty))])*1000000
+											);					
+Hour := IF(ROUND(torFile.begintime/100)=0,
+									24,
+									ROUND(torFile.begintime/100)
+									);		
+States := ['ALABAMA','ALASKA','ARIZONA','ARKANSAS','CALIFORNIA','COLORADO',
+						'CONNECTICUT','DELAWARE','FLORIDA','GEORGIA','HAWAII','IDAHO',
+						'ILLINOIS','INDIANA','IOWA','KANSAS','KENTUCKY','LOUISIANA','MAINE',
+						'MARYLAND','MASSACGUSETTS','MICHIGAN','MINNESOTA','MISSISSIPPI','MISSOURI',
+						'MONTANA','NEBRASKA','NEVADA','NEW HAMPSHIRE','NEW JERSEY','NEW MEXICO',
+						'NEW YORK','NORTH CAROLINA','NORTH DAKOTA','OHIO','OKLAHOMA','OREGON',
+						'PENNSYLVANIA','RHODE ISLAND','SOUTH CAROLINA','SOUTH DAKOTA','TENNESSEE',
+						'TEXAS','UTAH','VERMONT','VIRGINIA','WASHINGTON','WEST VIRGINIA','WISCONSIN',
+						'WYOMING','DISTRICT OF COLUMBIA','AMERICAN SAMOA','GUAM','NORTHEN MARIANA ISLANDS',
+						'PUERTO RICO','VIRGIN ISLANDS'];
 												
-//Visualization 1
-testCount := TABLE(locationEmptyFile, {beginloaction, state, NumberOfTornadoes := COUNT(GROUP)}, beginloaction);
-OUTPUT(SORT(testCount, -NumberOfTornadoes), NAMED('Tornadoes_In_City'));
-mappings :=  DATASET([  {'Location', 'beginloaction'}/*x*/, 
-                        {'Tornadoes', 'NumberOfTornadoes'}/*Y*/], 
+/*Visualization 1
+table1 := TABLE(locationNotEmptyFile, {beginloaction, state, NumberOfTornadoes := COUNT(GROUP)}, beginloaction, state);
+OUTPUT(SORT(table1, -NumberOfTornadoes), NAMED('Tornadoes_In_City'));
+mappings :=  DATASET([  {'', 'beginloaction'}, 
+                        {'Tornadoes', 'NumberOfTornadoes'}], 
 												Visualizer.KeyValueDef);												
-Visualizer.MultiD.column('Tornadoes_In_City_Chart', /*datasource*/, 'Tornadoes_In_City', mappings, /*filteredBy*/, /*dermatologyProperties*/ );
+Visualizer.MultiD.column('Tornadoes_In_City_Chart',, 'Tornadoes_In_City', mappings,,);
+*/
 
-//Visualization 2
-testCount2 := TABLE(locationEmptyFile, {state, NumberOfTornadoes := COUNT(GROUP)}, state);
-OUTPUT(SORT(testCount2, -NumberOfTornadoes), NAMED('Tornadoes_In_State'));
-mappings2 :=  DATASET([  {'Location', 'state'}/*x*/, 
-                        {'Tornadoes', 'NumberOfTornadoes'}/*Y*/], 
+/*Visualization 2
+table2 := TABLE(torFile, {state, NumberOfTornadoes := COUNT(GROUP)}, state);
+OUTPUT(SORT(table2, -NumberOfTornadoes), NAMED('Tornadoes_In_State'));
+mappings2 :=  DATASET([  {'', 'state'}, 
+                        {'Tornadoes', 'NumberOfTornadoes'}], 
 												Visualizer.KeyValueDef);												
-Visualizer.MultiD.column('Tornadoes_In_State_Chart', /*datasource*/, 'Tornadoes_In_State', mappings2, /*filteredBy*/, /*dermatologyProperties*/ );
+Visualizer.MultiD.column('Tornadoes_In_State_Chart',, 'Tornadoes_In_State', mappings2,,);
+*/
 
-//Visualization 3
-testCount3 := TABLE(locationEmptyFile, {Hour := IF(ROUND(begintime/100)=0,24,ROUND(begintime/100)), NumberOfTornadoes := COUNT(GROUP)}, IF(ROUND(begintime/100)=0,24,ROUND(begintime/100)));
-OUTPUT(SORT(testCount3, Hour), NAMED('Tornadoes_Per_Hour'));
-mappings3 :=  DATASET([  {'Hour', 'Hour'}/*x*/, 
-                        {'Tornadoes', 'NumberOfTornadoes'}/*Y*/], 
+/*Visualization 3
+table3 := TABLE(torFile, {Hour, NumberOfTornadoes := COUNT(GROUP)}, Hour);
+OUTPUT(SORT(table3, Hour), NAMED('Tornadoes_Per_Hour'));
+mappings3 :=  DATASET([  {'', 'Hour'},
+                        {'Tornadoes', 'NumberOfTornadoes'}], 
 												Visualizer.KeyValueDef);												
-Visualizer.MultiD.column('Tornadoes_Per_Hour_Chart', /*datasource*/, 'Tornadoes_Per_Hour', mappings3, /*filteredBy*/, /*properties*/ );
+Visualizer.MultiD.column('Tornadoes_Per_Hour_Chart',, 'Tornadoes_Per_Hour', mappings3,,);
+*/
+
+/*Visualization 4		 
+table4 := TABLE(torFile, {Hour, TotalPropertyDamage:= SUM(GROUP, PropertyDamage)}, Hour);
+OUTPUT(SORT(table4, Hour), NAMED('PropertyDamage_Per_Hour'));
+mappings4 :=  DATASET([  {'', 'Hour'}, 
+                        {'Damage', 'TotalPropertyDamage'}], 
+												Visualizer.KeyValueDef);												
+Visualizer.MultiD.column('PropertyDamage_Per_Hour_Chart',, 'PropertyDamage_Per_Hour', mappings4,,);
+*/
+
+/*Visualization 5	
+table5 := TABLE(torFile, {state, TotalPropertyDamage:= SUM(GROUP, PropertyDamage)}, state);
+OUTPUT(SORT(table5, -TotalPropertyDamage), NAMED('PropertyDamage_Per_State'));
+mappings5 :=  DATASET([  {'', 'state'}, 
+                        {'Damage', 'TotalPropertyDamage'}], 
+												Visualizer.KeyValueDef);												
+Visualizer.MultiD.column('PropertyDamage_Per_State_Chart',, 'PropertyDamage_Per_State', mappings5,,);
+*/
+
+/*Visualization 6	
+table6 := TABLE(locationNotEmptyFile, {beginloaction, state, TotalPropertyDamage:= SUM(GROUP, PropertyDamage)}, beginloaction, state);
+OUTPUT(SORT(table6, -TotalPropertyDamage), NAMED('PropertyDamage_Per_City'));
+mappings6 :=  DATASET([  {'', 'beginloaction'}, 
+                        {'Damage', 'TotalPropertyDamage'}], 
+												Visualizer.KeyValueDef);												
+Visualizer.MultiD.column('PropertyDamage_Per_City_Chart',, 'PropertyDamage_Per_City', mappings6,,);
+*/	 
 
 
 
+////////////////////////////////////////////////   FOR ALL STORMS   //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
+/*Visualization 7	
+table7 := TABLE(stormFile, {state, TotalPropertyDamage:= SUM(GROUP, StormPropertyDamage)}, state);
+OUTPUT(SORT(table7(state IN States), -TotalPropertyDamage), NAMED('STORM_PropertyDamage_Per_State'));
+mappings7 :=  DATASET([  {'', 'state'}, 
+                        {'Damage', 'TotalPropertyDamage'}], 
+												Visualizer.KeyValueDef);												
+Visualizer.MultiD.column('STORM_PropertyDamage_Per_State_Chart',, 'STORM_PropertyDamage_Per_State', mappings7,,);
+*/
 
 
