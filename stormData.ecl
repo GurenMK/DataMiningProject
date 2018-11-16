@@ -1,4 +1,4 @@
-﻿import $, std;
+﻿import $;
 IMPORT $.^.Visualizer;
 
 Layout := RECORD
@@ -66,6 +66,9 @@ DataFile := '~online::project::tornado::alldata__p454606156';
 DataFile2 := '~online::project::storm::alldata__p280202545';
 torFile := DATASET(DataFile, Layout, THOR);
 stormFile := DATASET(DataFile2, Layout, THOR);
+sortStormFile := SORT(stormFile, eventtype);
+dedupStorms := DEDUP(sortStormFile, eventtype);
+dedupStorms;
 //OUTPUT(torFile, NAMED('ALLTornadoes'));
 //OUTPUT(COUNT(torFile), NAMED('ALLTornadoesCount'));
 //OUTPUT(stormFile, NAMED('ALLStorms'));
@@ -124,14 +127,14 @@ mappings3 :=  DATASET([  {'', 'Hour'},
 Visualizer.MultiD.column('Tornadoes_Per_Hour_Chart',, 'Tornadoes_Per_Hour', mappings3,,);
 */
 
-/*Visualization 4		 
+/*Visualization 4	 
 table4 := TABLE(torFile, {Hour, TotalPropertyDamage:= SUM(GROUP, PropertyDamage)}, Hour);
 OUTPUT(SORT(table4, Hour), NAMED('PropertyDamage_Per_Hour'));
 mappings4 :=  DATASET([  {'', 'Hour'}, 
                         {'Damage', 'TotalPropertyDamage'}], 
 												Visualizer.KeyValueDef);												
 Visualizer.MultiD.column('PropertyDamage_Per_Hour_Chart',, 'PropertyDamage_Per_Hour', mappings4,,);
-*/
+*/	
 
 /*Visualization 5	
 table5 := TABLE(torFile, {state, TotalPropertyDamage:= SUM(GROUP, PropertyDamage)}, state);
@@ -149,8 +152,20 @@ mappings6 :=  DATASET([  {'', 'beginloaction'},
                         {'Damage', 'TotalPropertyDamage'}], 
 												Visualizer.KeyValueDef);												
 Visualizer.MultiD.column('PropertyDamage_Per_City_Chart',, 'PropertyDamage_Per_City', mappings6,,);
-*/	 
+	 
+*/
 
+////////////    Albany, GA     //////////////////////////////////////////
+
+
+/*Visualization 8
+table8 := TABLE(locationNotEmptyFile, {beginloaction, state, TotalPropertyDamage:= SUM(GROUP, PropertyDamage)}, beginloaction, state);
+OUTPUT(SORT(table8(beginloaction = 'ALBANY' AND state = 'GEORGIA'), -TotalPropertyDamage), NAMED('Tornadoes_In_AlbanyGA'));
+mappings8 :=  DATASET([  {'', 'beginloaction'}, 
+                        {'Damage', 'TotalPropertyDamage'}], 
+												Visualizer.KeyValueDef);												
+Visualizer.MultiD.column('Tornadoes_In_AlbanyGA_Chart',, 'Tornadoes_In_AlbanyGA', mappings8,,);
+*/
 
 
 ////////////////////////////////////////////////   FOR ALL STORMS   //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,4 +179,12 @@ mappings7 :=  DATASET([  {'', 'state'},
 Visualizer.MultiD.column('STORM_PropertyDamage_Per_State_Chart',, 'STORM_PropertyDamage_Per_State', mappings7,,);
 */
 
+/*Visualization 9
+table9 := TABLE(stormFile, {state, NumberOfStorms := COUNT(GROUP)}, state);
+OUTPUT(SORT(table9(state IN States), -NumberOfStorms), NAMED('STORM_In_State'));
+mappings9 :=  DATASET([  {'', 'state'}, 
+                        {'Storms', 'NumberOfStorms'}], 
+												Visualizer.KeyValueDef);												
+Visualizer.MultiD.column('STORM_In_State_Chart',, 'STORM_In_State', mappings9,,);
+*/
 
