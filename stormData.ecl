@@ -66,9 +66,10 @@ DataFile := '~online::project::tornado::alldata__p454606156';
 DataFile2 := '~online::project::storm::alldata__p280202545';
 torFile := DATASET(DataFile, Layout, THOR);
 stormFile := DATASET(DataFile2, Layout, THOR);
-sortStormFile := SORT(stormFile, eventtype);
-dedupStorms := DEDUP(sortStormFile, eventtype);
-dedupStorms;
+OUTPUT(COUNT(stormFile), NAMED('ALLStormsCount'));
+//sortStormFile := SORT(stormFile, eventtype);
+//dedupStorms := DEDUP(sortStormFile, eventtype);
+//dedupStorms;
 //OUTPUT(torFile, NAMED('ALLTornadoes'));
 //OUTPUT(COUNT(torFile), NAMED('ALLTornadoesCount'));
 //OUTPUT(stormFile, NAMED('ALLStorms'));
@@ -151,8 +152,7 @@ OUTPUT(SORT(table6, -TotalPropertyDamage), NAMED('PropertyDamage_Per_City'));
 mappings6 :=  DATASET([  {'', 'beginloaction'}, 
                         {'Damage', 'TotalPropertyDamage'}], 
 												Visualizer.KeyValueDef);												
-Visualizer.MultiD.column('PropertyDamage_Per_City_Chart',, 'PropertyDamage_Per_City', mappings6,,);
-	 
+Visualizer.MultiD.column('PropertyDamage_Per_City_Chart',, 'PropertyDamage_Per_City', mappings6,,); 
 */
 
 ////////////    Albany, GA     //////////////////////////////////////////
